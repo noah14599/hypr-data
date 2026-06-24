@@ -22,7 +22,11 @@ jobs:
         run: |
           git config user.name "hypr-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add stockData.json
-          git commit -m "data: refresh prices" || echo "no changes"
-          git pull --rebase --autostash || true
-          git push
+          git add stockData.json || true
+          git diff --cached --quiet && echo "no changes" && exit 0
+          git commit -m "data: refresh"
+          for i in 1 2 3; do
+            git pull --rebase -X ours origin main || true
+            git push origin main && break
+            echo "retry $i" && sleep 3
+          done
