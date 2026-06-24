@@ -1,0 +1,28 @@
+name: Refresh HYPR prices
+on:
+  schedule:
+    - cron: '*/15 13-21 * * 1-5'
+  workflow_dispatch: {}
+concurrency:
+  group: hypr-data
+  cancel-in-progress: false
+jobs:
+  prices:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install yfinance
+        run: pip install yfinance
+      - name: Fetch prices + charts
+        run: python fetch_stockdata.py prices
+      - name: Commit snapshot
+        run: |
+          git config user.name "hypr-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add stockData.json
+          git commit -m "data: refresh prices" || echo "no changes"
+          git pull --rebase --autostash || true
+          git push
