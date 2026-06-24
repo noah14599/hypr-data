@@ -85,9 +85,15 @@ def fetch_charts(sym):
     for app_range, period, interval in CHART_SPECS:
         try:
             df = yf.Ticker(sym).history(period=period, interval=interval, auto_adjust=True)
-            closes = df["Close"].dropna().tolist()
-            if closes:
-                out[app_range] = [round(c, 2) for c in closes]
+            df = df.dropna(subset=["Close"])
+            if len(df):
+                out[app_range] = {
+                    "o": [round(float(x), 2) for x in df["Open"].tolist()],
+                    "h": [round(float(x), 2) for x in df["High"].tolist()],
+                    "l": [round(float(x), 2) for x in df["Low"].tolist()],
+                    "c": [round(float(x), 2) for x in df["Close"].tolist()],
+                    "v": [int(x) for x in df["Volume"].fillna(0).tolist()],
+                }
         except Exception:
             pass
         time.sleep(0.1)
