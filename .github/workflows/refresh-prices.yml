@@ -1,8 +1,4 @@
 name: Refresh HYPR prices
-on:
-  schedule:
-    - cron: '*/15 13-21 * * 1-5'
-  workflow_dispatch: {}
 concurrency:
   group: hypr-data
   cancel-in-progress: false
